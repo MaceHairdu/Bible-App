@@ -1,0 +1,9 @@
+{
+  "name": "Bible Reader",
+  "short_name": "Bible",
+  "description": "A distraction-free Bible reader with original-language study tools.",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f5f1e8",
+  "theme_color": "#f5f1e8"
+}
