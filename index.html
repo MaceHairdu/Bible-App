@@ -7,260 +7,93 @@
   <link rel="manifest" href="manifest.webmanifest" />
   <title>Bible Reader</title>
   <style>
-    :root {
-      --bg:#f5f1e8;
-      --paper:#fffdf8;
-      --text:#26231f;
-      --muted:#777067;
-      --line:#ded7ca;
-      --accent:#6c5b45;
-      --accent-soft:#ebe3d7;
-    }
-    *{box-sizing:border-box}
-    html{scroll-behavior:auto}
-    body{margin:0;background:var(--bg);color:var(--text);font-family:Georgia,"Times New Roman",serif}
-    button{font:inherit}
-    .topbar{position:sticky;top:0;z-index:20;background:rgba(245,241,232,.96);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);padding:calc(10px + env(safe-area-inset-top)) 16px 10px;display:flex;align-items:center;justify-content:space-between;gap:12px}
-    .book{font-size:20px;font-weight:700}
-    .controls{display:flex;gap:8px;align-items:center}
-    .btn{border:1px solid var(--line);background:var(--paper);border-radius:999px;padding:9px 12px;color:var(--text)}
-    .btn[aria-pressed="true"]{background:var(--accent);color:white;border-color:var(--accent)}
-    main{max-width:760px;margin:0 auto;padding:28px 24px 100px}
-    .intro{color:var(--muted);font-family:system-ui,-apple-system,sans-serif;font-size:13px;margin-bottom:28px}
-    .section-title{font-family:system-ui,-apple-system,sans-serif;text-transform:uppercase;letter-spacing:.16em;font-size:12px;color:var(--muted);margin:36px 0 14px}
-    .text{font-size:23px;line-height:1.78;letter-spacing:.005em}
-    .para{margin:0 0 24px}
-    .word{border-radius:4px;cursor:pointer;-webkit-tap-highlight-color:transparent}
-    .word:active{background:var(--accent-soft)}
-    .bionic .word .focus{font-weight:700}
-    .bionic .word .tail{font-weight:400}
-    .scroll-rail{position:fixed;right:5px;top:90px;bottom:35px;width:24px;z-index:15;display:flex;justify-content:center;touch-action:none}
-    .scroll-track{width:4px;height:100%;background:rgba(80,70,55,.18);border-radius:4px;position:relative}
-    .scroll-thumb{position:absolute;left:50%;transform:translate(-50%,-50%);width:18px;height:44px;border-radius:10px;background:rgba(80,70,55,.42);top:0}
-    .scrub-label{position:fixed;right:38px;top:50%;transform:translateY(-50%);background:#26231f;color:white;border-radius:10px;padding:10px 12px;font-family:system-ui,-apple-system,sans-serif;font-size:13px;display:none;z-index:30;min-width:92px;text-align:center}
-    .sheet-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.28);z-index:39;display:none}
-    .sheet{position:fixed;left:0;right:0;bottom:0;z-index:40;background:var(--paper);border-radius:22px 22px 0 0;padding:10px 20px calc(22px + env(safe-area-inset-bottom));box-shadow:0 -10px 30px rgba(0,0,0,.14);transform:translateY(110%);transition:transform .2s ease;max-height:78%;overflow:auto}
-    .sheet.open{transform:translateY(0)}
-    .sheet-backdrop.open{display:block}
-    .grabber{width:42px;height:5px;border-radius:5px;background:var(--line);margin:0 auto 16px}
-    .ref{font-family:system-ui,-apple-system,sans-serif;color:var(--muted);font-size:13px;margin-bottom:4px}
-    .selected{font-size:28px;font-weight:700;margin-bottom:18px}
-    .original{font-size:34px;margin-bottom:5px}
-    .translit{font-style:italic;color:var(--muted);margin-bottom:16px}
-    .meaning{font-family:system-ui,-apple-system,sans-serif;line-height:1.5;margin-bottom:18px}
-    .video{display:none;font-family:system-ui,-apple-system,sans-serif;border-top:1px solid var(--line);padding-top:16px}
-    .video a{color:var(--accent);font-weight:700;text-decoration:none}
-    .close{width:100%;margin-top:18px;border:0;background:var(--accent);color:#fff;border-radius:12px;padding:13px;font-family:system-ui,-apple-system,sans-serif;font-weight:700}
-    @media(max-width:600px){main{padding-left:20px;padding-right:32px}.text{font-size:21px;line-height:1.75}.topbar{padding-left:14px;padding-right:14px}.btn{padding:8px 10px;font-size:14px}}
+    :root{--bg:#f5f1e8;--paper:#fffdf8;--text:#26231f;--muted:#777067;--line:#ded7ca;--accent:#6c5b45;--accent-soft:#ebe3d7}
+    *{box-sizing:border-box} html{scroll-behavior:auto} body{margin:0;background:var(--bg);color:var(--text);font-family:Georgia,"Times New Roman",serif} button{font:inherit}
+    .topbar{position:sticky;top:0;z-index:20;background:rgba(245,241,232,.96);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);padding:calc(10px + env(safe-area-inset-top)) 14px 10px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+    .bookbtn{border:0;background:transparent;padding:6px 4px;color:var(--text);font-weight:700;font-size:20px;display:flex;align-items:center;gap:6px;min-width:0}.bookbtn span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.chev{font-size:13px;color:var(--muted)}
+    .controls{display:flex;gap:7px;align-items:center}.btn{border:1px solid var(--line);background:var(--paper);border-radius:999px;padding:8px 10px;color:var(--text);font-family:system-ui,-apple-system,sans-serif;font-size:14px}.btn[aria-pressed="true"]{background:var(--accent);color:#fff;border-color:var(--accent)}
+    main{max-width:760px;margin:0 auto;padding:24px 24px 110px}.status{color:var(--muted);font-family:system-ui,-apple-system,sans-serif;font-size:13px;margin:0 0 24px}.text{font-size:23px;line-height:1.78;letter-spacing:.005em}.chapter{display:contents}.para{margin:0 0 24px}.word{border-radius:4px;cursor:pointer;-webkit-tap-highlight-color:transparent}.word:active{background:var(--accent-soft)}.bionic .word .focus{font-weight:700}.bionic .word .tail{font-weight:400}
+    .loading{font-family:system-ui,-apple-system,sans-serif;color:var(--muted);padding:48px 0;text-align:center}.error{font-family:system-ui,-apple-system,sans-serif;color:#7a2f2f;line-height:1.5;padding:30px 0}
+    .scroll-rail{position:fixed;right:5px;top:85px;bottom:30px;width:24px;z-index:15;display:flex;justify-content:center;touch-action:none}.scroll-track{width:4px;height:100%;background:rgba(80,70,55,.18);border-radius:4px;position:relative}.scroll-thumb{position:absolute;left:50%;transform:translate(-50%,-50%);width:18px;height:44px;border-radius:10px;background:rgba(80,70,55,.42);top:0}.scrub-label{position:fixed;right:38px;top:50%;transform:translateY(-50%);background:#26231f;color:#fff;border-radius:10px;padding:10px 12px;font-family:system-ui,-apple-system,sans-serif;font-size:13px;display:none;z-index:30;min-width:105px;text-align:center}
+    .backdrop{position:fixed;inset:0;background:rgba(0,0,0,.3);z-index:39;display:none}.backdrop.open{display:block}.sheet{position:fixed;left:0;right:0;bottom:0;z-index:40;background:var(--paper);border-radius:22px 22px 0 0;padding:10px 20px calc(22px + env(safe-area-inset-bottom));box-shadow:0 -10px 30px rgba(0,0,0,.14);transform:translateY(110%);transition:transform .2s ease;max-height:78%;overflow:auto}.sheet.open{transform:translateY(0)}.grabber{width:42px;height:5px;border-radius:5px;background:var(--line);margin:0 auto 16px}.ref{font-family:system-ui,-apple-system,sans-serif;color:var(--muted);font-size:13px;margin-bottom:4px}.selected{font-size:28px;font-weight:700;margin-bottom:14px}.strong{font-family:system-ui,-apple-system,sans-serif;color:var(--accent);font-weight:700;margin-bottom:14px}.meaning{font-family:system-ui,-apple-system,sans-serif;line-height:1.5;margin-bottom:18px}.close{width:100%;margin-top:10px;border:0;background:var(--accent);color:#fff;border-radius:12px;padding:13px;font-family:system-ui,-apple-system,sans-serif;font-weight:700}
+    .picker{position:fixed;inset:0;z-index:50;background:var(--bg);display:none;overflow:auto;padding:calc(16px + env(safe-area-inset-top)) 18px calc(26px + env(safe-area-inset-bottom))}.picker.open{display:block}.picker-head{max-width:760px;margin:0 auto 18px;display:flex;justify-content:space-between;align-items:center}.picker-head h2{margin:0;font-family:system-ui,-apple-system,sans-serif;font-size:22px}.picker-close{border:1px solid var(--line);background:var(--paper);border-radius:999px;padding:8px 12px}.testament{max-width:760px;margin:24px auto 10px;font-family:system-ui,-apple-system,sans-serif;color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.14em}.bookgrid{max-width:760px;margin:0 auto;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.pickbook{border:1px solid var(--line);background:var(--paper);border-radius:12px;padding:13px 12px;text-align:left;color:var(--text);font-family:system-ui,-apple-system,sans-serif}.pickbook.current{border-color:var(--accent);font-weight:700}
+    .footer-note{font-family:system-ui,-apple-system,sans-serif;color:var(--muted);font-size:12px;line-height:1.5;margin-top:42px;border-top:1px solid var(--line);padding-top:16px}
+    @media(max-width:600px){main{padding-left:20px;padding-right:32px}.text{font-size:21px;line-height:1.75}.bookgrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
   </style>
 </head>
 <body>
   <header class="topbar">
-    <div class="book">Genesis</div>
-    <div class="controls">
-      <button class="btn" id="bionicBtn" type="button" aria-pressed="false">Bionic</button>
-      <button class="btn" id="topBtn" type="button">Top</button>
-    </div>
+    <button class="bookbtn" id="bookBtn" type="button"><span id="bookName">Genesis</span><span class="chev">▼</span></button>
+    <div class="controls"><button class="btn" id="bionicBtn" type="button" aria-pressed="false">Bionic</button><button class="btn" id="topBtn" type="button">Top</button></div>
   </header>
 
   <main>
-    <div class="intro">Continuous reading mode. Chapter and verse numbers stay hidden unless you inspect a word.</div>
-
-    <div class="section-title">The Beginning</div>
-    <article id="reader" class="text" aria-label="Bible text"></article>
+    <p class="status" id="status">Berean Standard Bible · Continuous reading mode</p>
+    <article id="reader" class="text" aria-label="Bible text"><div class="loading">Loading Genesis…</div></article>
+    <div class="footer-note">Berean Standard Bible (BSB). Public domain / CC0 source text. Chapter and verse references are retained as metadata but hidden during normal reading.</div>
   </main>
 
-  <div class="scroll-rail" id="scrollRail" aria-label="Fast scroll">
-    <div class="scroll-track"><div class="scroll-thumb" id="scrollThumb"></div></div>
-  </div>
+  <div class="scroll-rail" id="scrollRail" aria-label="Fast scroll"><div class="scroll-track"><div class="scroll-thumb" id="scrollThumb"></div></div></div>
   <div class="scrub-label" id="scrubLabel">Genesis</div>
 
-  <div class="sheet-backdrop" id="backdrop"></div>
+  <div class="backdrop" id="backdrop"></div>
   <section class="sheet" id="wordSheet" aria-live="polite" aria-label="Word details">
-    <div class="grabber"></div>
-    <div class="ref" id="detailRef"></div>
-    <div class="selected" id="detailWord"></div>
-    <div class="original" id="detailOriginal"></div>
-    <div class="translit" id="detailTranslit"></div>
-    <div class="meaning" id="detailMeaning"></div>
-    <div class="video" id="detailVideo"><a id="videoLink" href="#" target="_blank" rel="noopener noreferrer">Watch related BibleProject video ↗</a></div>
-    <button class="close" id="closeSheet" type="button">Close</button>
+    <div class="grabber"></div><div class="ref" id="detailRef"></div><div class="selected" id="detailWord"></div><div class="strong" id="detailStrong"></div><div class="meaning" id="detailMeaning"></div><button class="close" id="closeSheet" type="button">Close</button>
+  </section>
+
+  <section class="picker" id="bookPicker" aria-label="Choose a book">
+    <div class="picker-head"><h2>Choose a book</h2><button class="picker-close" id="pickerClose" type="button">Close</button></div>
+    <div class="testament">Old Testament</div><div class="bookgrid" id="otGrid"></div>
+    <div class="testament">New Testament</div><div class="bookgrid" id="ntGrid"></div>
   </section>
 
   <script>
-    const sample = [
-      {ref:'Genesis 1:1', text:'In the beginning God created the heavens and the earth.'},
-      {ref:'Genesis 1:2', text:'The earth was formless and empty. Darkness was on the surface of the deep and God’s Spirit was hovering over the surface of the waters.'},
-      {ref:'Genesis 1:3', text:'God said, “Let there be light,” and there was light.'},
-      {ref:'Genesis 1:4', text:'God saw the light, and saw that it was good. God divided the light from the darkness.'},
-      {ref:'Genesis 1:5', text:'God called the light “day,” and the darkness he called “night.” There was evening and there was morning, the first day.'},
-      {ref:'Genesis 1:6', text:'God said, “Let there be an expanse in the middle of the waters, and let it divide the waters from the waters.”'},
-      {ref:'Genesis 1:7', text:'God made the expanse and divided the waters which were under the expanse from the waters which were above the expanse. It was so.'},
-      {ref:'Genesis 1:8', text:'God called the expanse “sky.” There was evening and there was morning, a second day.'},
-      {ref:'Genesis 1:9', text:'God said, “Let the waters under the sky be gathered together to one place, and let the dry land appear.” It was so.'},
-      {ref:'Genesis 1:10', text:'God called the dry land “earth,” and the gathering together of the waters he called “seas.” God saw that it was good.'},
-      {ref:'Genesis 1:11', text:'God said, “Let the earth yield grass, herbs yielding seeds, and fruit trees bearing fruit after their kind, with their seeds in it, on the earth.” It was so.'},
-      {ref:'Genesis 1:12', text:'The earth yielded grass, herbs yielding seed after their kind, and trees bearing fruit, with their seeds in it, after their kind. God saw that it was good.'},
-      {ref:'Genesis 1:13', text:'There was evening and there was morning, a third day.'}
-    ];
+    const DATA_ROOT='https://raw.githubusercontent.com/BSB-publishing/bsb-data-output/main/base/helloao';
+    const books=[
+      ['GEN','Genesis',50],['EXO','Exodus',40],['LEV','Leviticus',27],['NUM','Numbers',36],['DEU','Deuteronomy',34],['JOS','Joshua',24],['JDG','Judges',21],['RUT','Ruth',4],['1SA','1 Samuel',31],['2SA','2 Samuel',24],['1KI','1 Kings',22],['2KI','2 Kings',25],['1CH','1 Chronicles',29],['2CH','2 Chronicles',36],['EZR','Ezra',10],['NEH','Nehemiah',13],['EST','Esther',10],['JOB','Job',42],['PSA','Psalms',150],['PRO','Proverbs',31],['ECC','Ecclesiastes',12],['SNG','Song of Solomon',8],['ISA','Isaiah',66],['JER','Jeremiah',52],['LAM','Lamentations',5],['EZK','Ezekiel',48],['DAN','Daniel',12],['HOS','Hosea',14],['JOL','Joel',3],['AMO','Amos',9],['OBA','Obadiah',1],['JON','Jonah',4],['MIC','Micah',7],['NAM','Nahum',3],['HAB','Habakkuk',3],['ZEP','Zephaniah',3],['HAG','Haggai',2],['ZEC','Zechariah',14],['MAL','Malachi',4],
+      ['MAT','Matthew',28],['MRK','Mark',16],['LUK','Luke',24],['JHN','John',21],['ACT','Acts',28],['ROM','Romans',16],['1CO','1 Corinthians',16],['2CO','2 Corinthians',13],['GAL','Galatians',6],['EPH','Ephesians',6],['PHP','Philippians',4],['COL','Colossians',4],['1TH','1 Thessalonians',5],['2TH','2 Thessalonians',3],['1TI','1 Timothy',6],['2TI','2 Timothy',4],['TIT','Titus',3],['PHM','Philemon',1],['HEB','Hebrews',13],['JAS','James',5],['1PE','1 Peter',5],['2PE','2 Peter',3],['1JN','1 John',5],['2JN','2 John',1],['3JN','3 John',1],['JUD','Jude',1],['REV','Revelation',22]
+    ].map((b,i)=>({id:b[0],name:b[1],chapters:b[2],number:i+1}));
 
-    const wordData = {
-      'beginning':{original:'רֵאשִׁית', translit:'rēʾšît', meaning:'Beginning, first, chief, first part.', ref:'Genesis 1:1', video:'https://www.youtube.com/@bibleproject'},
-      'god':{original:'אֱלֹהִים', translit:'ʾĕlōhîm', meaning:'God; the Hebrew noun used here is Elohim.', ref:'Genesis 1:1', video:'https://www.youtube.com/@bibleproject'},
-      'created':{original:'בָּרָא', translit:'bārāʾ', meaning:'To create, shape, or form.', ref:'Genesis 1:1', video:'https://www.youtube.com/@bibleproject'},
-      'heavens':{original:'שָׁמַיִם', translit:'šāmayim', meaning:'Heavens, sky, or the realm above.', ref:'Genesis 1:1'},
-      'earth':{original:'אֶרֶץ', translit:'ʾereṣ', meaning:'Earth, land, ground, or territory.', ref:'Genesis 1:1'},
-      'spirit':{original:'רוּחַ', translit:'rûaḥ', meaning:'Spirit, wind, or breath.', ref:'Genesis 1:2', video:'https://www.youtube.com/@bibleproject'}
-    };
+    const reader=document.getElementById('reader'),bookName=document.getElementById('bookName'),status=document.getElementById('status'),bionicBtn=document.getElementById('bionicBtn'),bookPicker=document.getElementById('bookPicker'),otGrid=document.getElementById('otGrid'),ntGrid=document.getElementById('ntGrid'),sheet=document.getElementById('wordSheet'),backdrop=document.getElementById('backdrop'),detailRef=document.getElementById('detailRef'),detailWord=document.getElementById('detailWord'),detailStrong=document.getElementById('detailStrong'),detailMeaning=document.getElementById('detailMeaning'),scrollRail=document.getElementById('scrollRail'),scrollThumb=document.getElementById('scrollThumb'),scrubLabel=document.getElementById('scrubLabel');
+    let currentBookId=localStorage.getItem('bible-book')||'GEN'; let bionic=localStorage.getItem('bible-bionic')==='true'; let loadToken=0; let longPressTimer=null; let saveTimer=null;
 
-    const reader = document.getElementById('reader');
-    const bionicBtn = document.getElementById('bionicBtn');
-    const topBtn = document.getElementById('topBtn');
-    const sheet = document.getElementById('wordSheet');
-    const backdrop = document.getElementById('backdrop');
-    const detailRef = document.getElementById('detailRef');
-    const detailWord = document.getElementById('detailWord');
-    const detailOriginal = document.getElementById('detailOriginal');
-    const detailTranslit = document.getElementById('detailTranslit');
-    const detailMeaning = document.getElementById('detailMeaning');
-    const detailVideo = document.getElementById('detailVideo');
-    const videoLink = document.getElementById('videoLink');
-    const scrollRail = document.getElementById('scrollRail');
-    const scrollThumb = document.getElementById('scrollThumb');
-    const scrubLabel = document.getElementById('scrubLabel');
+    function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+    function bionicMarkup(word){const m=word.match(/^([^A-Za-zÀ-ÿ0-9]*)([A-Za-zÀ-ÿ0-9’'-]+)([^A-Za-zÀ-ÿ0-9]*)$/);if(!m)return esc(word);const core=m[2];if(core.length<=2)return esc(m[1])+`<span class="focus">${esc(core)}</span>`+esc(m[3]);const cut=Math.max(1,Math.ceil(core.length*.45));return esc(m[1])+`<span class="focus">${esc(core.slice(0,cut))}</span><span class="tail">${esc(core.slice(cut))}</span>`+esc(m[3])}
+    function wordMarkup(word){return bionic?bionicMarkup(word):esc(word)}
 
-    let bionic = localStorage.getItem('bible-bionic') === 'true';
-    let longPressTimer = null;
+    function makeWord(raw,meta,index){const span=document.createElement('span');span.className='word';span.dataset.ref=meta.ref;span.dataset.strong=meta.strong||'';span.dataset.token=String(index);span.dataset.chapter=String(meta.chapter);span.dataset.verse=String(meta.verse);span.dataset.raw=raw;span.innerHTML=wordMarkup(raw);return span}
+    function appendTaggedText(parent,text,meta,counter){text.split(/(\s+)/).forEach(piece=>{if(/^\s+$/.test(piece)){parent.appendChild(document.createTextNode(piece));return}parent.appendChild(makeWord(piece,meta,counter.value++))})}
 
-    function splitWord(word){
-      const match = word.match(/^([^A-Za-zÀ-ÿ'’]*)([A-Za-zÀ-ÿ'’]+)([^A-Za-zÀ-ÿ'’]*)$/);
-      if(!match) return {pre:'',core:word,post:''};
-      return {pre:match[1],core:match[2],post:match[3]};
+    function renderChapter(data,book,counter){const wrap=document.createElement('div');wrap.className='chapter';wrap.dataset.chapter=String(data.chapter.number);let para=document.createElement('p');para.className='para';let hasText=false;
+      for(const block of data.chapter.content||[]){if(block.type!=='verse')continue;const ref=`${book.name} ${data.chapter.number}:${block.number}`;for(const part of block.content||[]){if(typeof part==='string'){para.appendChild(document.createTextNode(part));hasText=true}else if(part&&part.text){appendTaggedText(para,part.text,{ref,strong:part.strong,chapter:data.chapter.number,verse:block.number},counter);hasText=true}}para.appendChild(document.createTextNode(' '))}
+      if(hasText)wrap.appendChild(para);return wrap}
+
+    async function fetchChapter(book,chapter){const r=await fetch(`${DATA_ROOT}/${book.id}/${chapter}.json`);if(!r.ok)throw new Error(`Could not load ${book.name} ${chapter}`);return r.json()}
+
+    async function loadBook(id,restore=true){const token=++loadToken;const book=books.find(b=>b.id===id)||books[0];currentBookId=book.id;localStorage.setItem('bible-book',book.id);bookName.textContent=book.name;document.title=`${book.name} · Bible Reader`;reader.classList.toggle('bionic',bionic);bionicBtn.setAttribute('aria-pressed',String(bionic));reader.innerHTML=`<div class="loading">Loading ${esc(book.name)}…</div>`;status.textContent=`Berean Standard Bible · Loading ${book.chapters} chapter${book.chapters===1?'':'s'}…`;highlightCurrentBook();
+      try{const results=new Array(book.chapters);let next=1;const workers=Array.from({length:Math.min(8,book.chapters)},async()=>{while(next<=book.chapters){const ch=next++;results[ch-1]=await fetchChapter(book,ch);if(token!==loadToken)return}});await Promise.all(workers);if(token!==loadToken)return;reader.innerHTML='';const counter={value:0};results.forEach(d=>reader.appendChild(renderChapter(d,book,counter)));status.textContent='Berean Standard Bible · Continuous reading mode';requestAnimationFrame(()=>{if(restore)restorePosition(book);else window.scrollTo(0,0);updateThumb()});}
+      catch(err){if(token!==loadToken)return;reader.innerHTML=`<div class="error"><strong>${esc(err.message)}</strong><br><br>The Bible text could not be downloaded. Check your connection and reload the page.</div>`;status.textContent='Berean Standard Bible'}
     }
 
-    function bionicMarkup(core){
-      if(core.length <= 2) return `<span class="focus">${core}</span>`;
-      const cut = Math.max(1, Math.ceil(core.length * .45));
-      return `<span class="focus">${core.slice(0,cut)}</span><span class="tail">${core.slice(cut)}</span>`;
-    }
+    function buildPicker(){books.forEach((book,i)=>{const b=document.createElement('button');b.type='button';b.className='pickbook';b.dataset.book=book.id;b.textContent=book.name;b.addEventListener('click',()=>{bookPicker.classList.remove('open');loadBook(book.id,false)});(i<39?otGrid:ntGrid).appendChild(b)});highlightCurrentBook()}
+    function highlightCurrentBook(){document.querySelectorAll('.pickbook').forEach(b=>b.classList.toggle('current',b.dataset.book===currentBookId))}
 
-    function render(){
-      reader.classList.toggle('bionic', bionic);
-      bionicBtn.setAttribute('aria-pressed', String(bionic));
-      reader.innerHTML = '';
+    function openWord(span){detailRef.textContent=span.dataset.ref||'';detailWord.textContent=span.dataset.raw||span.textContent;detailStrong.textContent=span.dataset.strong?`Strong's ${span.dataset.strong}`:'No Strong’s number attached';detailMeaning.textContent=span.dataset.strong?'This word is already connected to its Hebrew/Greek Strong’s identifier. The lexicon, original spelling, transliteration, morphology, and deeper word study will be connected next.':'This token does not have a Strong’s identifier in the source data.';sheet.classList.add('open');backdrop.classList.add('open')}
+    function closeSheet(){sheet.classList.remove('open');backdrop.classList.remove('open')}
 
-      const para = document.createElement('p');
-      para.className = 'para';
+    reader.addEventListener('pointerdown',e=>{const span=e.target.closest('.word');if(!span)return;longPressTimer=setTimeout(()=>openWord(span),450)});['pointerup','pointercancel','pointermove'].forEach(t=>reader.addEventListener(t,()=>clearTimeout(longPressTimer)));reader.addEventListener('click',e=>{const span=e.target.closest('.word');if(span&&matchMedia('(pointer:fine)').matches)openWord(span)});
+    document.getElementById('closeSheet').addEventListener('click',closeSheet);backdrop.addEventListener('click',closeSheet);document.getElementById('bookBtn').addEventListener('click',()=>bookPicker.classList.add('open'));document.getElementById('pickerClose').addEventListener('click',()=>bookPicker.classList.remove('open'));
+    bionicBtn.addEventListener('click',()=>{bionic=!bionic;localStorage.setItem('bible-bionic',String(bionic));reader.classList.toggle('bionic',bionic);bionicBtn.setAttribute('aria-pressed',String(bionic));document.querySelectorAll('.word').forEach(span=>span.innerHTML=wordMarkup(span.dataset.raw||span.textContent))});document.getElementById('topBtn').addEventListener('click',()=>window.scrollTo({top:0,behavior:'smooth'}));
 
-      sample.forEach((verse, verseIndex) => {
-        verse.text.split(/(\s+)/).forEach(token => {
-          if(/^\s+$/.test(token)){
-            para.appendChild(document.createTextNode(token));
-            return;
-          }
-          const parts = splitWord(token);
-          const span = document.createElement('span');
-          span.className = 'word';
-          span.dataset.ref = verse.ref;
-          span.dataset.word = parts.core;
-          span.dataset.verseIndex = String(verseIndex);
-          span.innerHTML = `${parts.pre}${bionic ? bionicMarkup(parts.core) : parts.core}${parts.post}`;
-          para.appendChild(span);
-        });
-        para.appendChild(document.createTextNode(' '));
-      });
+    function savePosition(){const y=document.querySelector('.topbar').getBoundingClientRect().bottom+12;let el=document.elementFromPoint(Math.min(innerWidth/2,360),Math.min(innerHeight-20,y));let word=el&&el.closest?el.closest('.word'):null;if(!word){const words=[...document.querySelectorAll('.word')];word=words.find(w=>w.getBoundingClientRect().bottom>y)||words[words.length-1]}if(!word)return;const rect=word.getBoundingClientRect();localStorage.setItem('bible-position',JSON.stringify({book:currentBookId,chapter:+word.dataset.chapter,verse:+word.dataset.verse,token:+word.dataset.token,offset:Math.round(rect.top-y)}))}
+    function restorePosition(book){let p=null;try{p=JSON.parse(localStorage.getItem('bible-position'))}catch{}if(!p||p.book!==book.id){window.scrollTo(0,0);return}const target=document.querySelector(`.word[data-token="${p.token}"]`);if(!target){window.scrollTo(0,0);return}target.scrollIntoView({block:'start'});window.scrollBy(0,-document.querySelector('.topbar').offsetHeight-(p.offset||0)-12)}
 
-      reader.appendChild(para);
-    }
+    function updateThumb(){const max=document.documentElement.scrollHeight-innerHeight;const p=max>0?scrollY/max:0;scrollThumb.style.top=`${Math.max(0,Math.min(100,p*100))}%`;clearTimeout(saveTimer);saveTimer=setTimeout(savePosition,180)}
+    function referenceNearPercent(p){const words=document.querySelectorAll('.word');if(!words.length)return books.find(b=>b.id===currentBookId)?.name||'';const idx=Math.min(words.length-1,Math.floor(p*(words.length-1)));return words[idx].dataset.ref||''}
+    function scrub(clientY){const rect=scrollRail.getBoundingClientRect();const p=Math.max(0,Math.min(1,(clientY-rect.top)/rect.height));const max=document.documentElement.scrollHeight-innerHeight;window.scrollTo(0,max*p);scrubLabel.textContent=referenceNearPercent(p);scrubLabel.style.display='block'}
+    scrollRail.addEventListener('pointerdown',e=>{scrollRail.setPointerCapture(e.pointerId);scrub(e.clientY)});scrollRail.addEventListener('pointermove',e=>{if(scrollRail.hasPointerCapture(e.pointerId))scrub(e.clientY)});scrollRail.addEventListener('pointerup',e=>{if(scrollRail.hasPointerCapture(e.pointerId))scrollRail.releasePointerCapture(e.pointerId);scrubLabel.style.display='none';savePosition()});window.addEventListener('scroll',updateThumb,{passive:true});window.addEventListener('resize',updateThumb);
 
-    function openWord(span){
-      const clean = (span.dataset.word || '').toLowerCase().replace(/[’']/g,'');
-      const data = wordData[clean];
-      detailRef.textContent = span.dataset.ref || '';
-      detailWord.textContent = span.dataset.word || '';
-      if(data){
-        detailOriginal.textContent = data.original;
-        detailTranslit.textContent = data.translit;
-        detailMeaning.textContent = data.meaning;
-        if(data.video){
-          videoLink.href = data.video;
-          detailVideo.style.display = 'block';
-        } else {
-          detailVideo.style.display = 'none';
-        }
-      } else {
-        detailOriginal.textContent = 'Original-language data not added yet';
-        detailTranslit.textContent = '';
-        detailMeaning.textContent = 'This prototype currently includes original-language data for a small sample of words. The full dataset will be added later.';
-        detailVideo.style.display = 'none';
-      }
-      sheet.classList.add('open');
-      backdrop.classList.add('open');
-    }
-
-    function closeSheet(){
-      sheet.classList.remove('open');
-      backdrop.classList.remove('open');
-    }
-
-    reader.addEventListener('pointerdown', e => {
-      const span = e.target.closest('.word');
-      if(!span) return;
-      longPressTimer = setTimeout(() => openWord(span), 450);
-    });
-    ['pointerup','pointercancel','pointermove'].forEach(type => reader.addEventListener(type, () => clearTimeout(longPressTimer)));
-    reader.addEventListener('click', e => {
-      const span = e.target.closest('.word');
-      if(span && matchMedia('(pointer:fine)').matches) openWord(span);
-    });
-
-    bionicBtn.addEventListener('click', () => {
-      bionic = !bionic;
-      localStorage.setItem('bible-bionic', String(bionic));
-      render();
-    });
-    topBtn.addEventListener('click', () => window.scrollTo({top:0,behavior:'smooth'}));
-    document.getElementById('closeSheet').addEventListener('click', closeSheet);
-    backdrop.addEventListener('click', closeSheet);
-
-    function updateThumb(){
-      const max = document.documentElement.scrollHeight - innerHeight;
-      const p = max > 0 ? scrollY / max : 0;
-      scrollThumb.style.top = `${Math.max(0,Math.min(100,p*100))}%`;
-      localStorage.setItem('bible-scroll', String(scrollY));
-    }
-
-    function scrub(clientY){
-      const rect = scrollRail.getBoundingClientRect();
-      const p = Math.max(0, Math.min(1, (clientY - rect.top) / rect.height));
-      const max = document.documentElement.scrollHeight - innerHeight;
-      window.scrollTo(0, max * p);
-      const idx = Math.min(sample.length - 1, Math.floor(p * sample.length));
-      scrubLabel.textContent = sample[idx].ref.replace(':',' : ');
-    }
-
-    scrollRail.addEventListener('pointerdown', e => {
-      scrollRail.setPointerCapture(e.pointerId);
-      scrubLabel.style.display = 'block';
-      scrub(e.clientY);
-    });
-    scrollRail.addEventListener('pointermove', e => {
-      if(scrollRail.hasPointerCapture(e.pointerId)) scrub(e.clientY);
-    });
-    scrollRail.addEventListener('pointerup', e => {
-      if(scrollRail.hasPointerCapture(e.pointerId)) scrollRail.releasePointerCapture(e.pointerId);
-      scrubLabel.style.display = 'none';
-    });
-
-    window.addEventListener('scroll', updateThumb, {passive:true});
-    window.addEventListener('beforeunload', updateThumb);
-
-    render();
-    requestAnimationFrame(() => {
-      const saved = Number(localStorage.getItem('bible-scroll') || 0);
-      if(Number.isFinite(saved) && saved > 0) window.scrollTo(0, saved);
-      updateThumb();
-    });
+    buildPicker();loadBook(currentBookId,true);
   </script>
 </body>
 </html>
