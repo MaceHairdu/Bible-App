@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#f5f1e8" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <title>Bible Reader</title>
+  <style>
+    :root {
+      --bg:#f5f1e8;
+      --paper:#fffdf8;
+      --text:#26231f;
+      --muted:#777067;
+      --line:#ded7ca;
+      --accent:#6c5b45;
+      --accent-soft:#ebe3d7;
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:auto}
+    body{margin:0;background:var(--bg);color:var(--text);font-family:Georgia,"Times New Roman",serif}
+    button{font:inherit}
+    .topbar{position:sticky;top:0;z-index:20;background:rgba(245,241,232,.96);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);padding:calc(10px + env(safe-area-inset-top)) 16px 10px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+    .book{font-size:20px;font-weight:700}
+    .controls{display:flex;gap:8px;align-items:center}
+    .btn{border:1px solid var(--line);background:var(--paper);border-radius:999px;padding:9px 12px;color:var(--text)}
+    .btn[aria-pressed="true"]{background:var(--accent);color:white;border-color:var(--accent)}
+    main{max-width:760px;margin:0 auto;padding:28px 24px 100px}
+    .intro{color:var(--muted);font-family:system-ui,-apple-system,sans-serif;font-size:13px;margin-bottom:28px}
+    .section-title{font-family:system-ui,-apple-system,sans-serif;text-transform:uppercase;letter-spacing:.16em;font-size:12px;color:var(--muted);margin:36px 0 14px}
+    .text{font-size:23px;line-height:1.78;letter-spacing:.005em}
+    .para{margin:0 0 24px}
+    .word{border-radius:4px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+    .word:active{background:var(--accent-soft)}
+    .bionic .word .focus{font-weight:700}
+    .bionic .word .tail{font-weight:400}
+    .scroll-rail{position:fixed;right:5px;top:90px;bottom:35px;width:24px;z-index:15;display:flex;justify-content:center;touch-action:none}
+    .scroll-track{width:4px;height:100%;background:rgba(80,70,55,.18);border-radius:4px;position:relative}
+    .scroll-thumb{position:absolute;left:50%;transform:translate(-50%,-50%);width:18px;height:44px;border-radius:10px;background:rgba(80,70,55,.42);top:0}
+    .scrub-label{position:fixed;right:38px;top:50%;transform:translateY(-50%);background:#26231f;color:white;border-radius:10px;padding:10px 12px;font-family:system-ui,-apple-system,sans-serif;font-size:13px;display:none;z-index:30;min-width:92px;text-align:center}
+    .sheet-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.28);z-index:39;display:none}
+    .sheet{position:fixed;left:0;right:0;bottom:0;z-index:40;background:var(--paper);border-radius:22px 22px 0 0;padding:10px 20px calc(22px + env(safe-area-inset-bottom));box-shadow:0 -10px 30px rgba(0,0,0,.14);transform:translateY(110%);transition:transform .2s ease;max-height:78%;overflow:auto}
+    .sheet.open{transform:translateY(0)}
+    .sheet-backdrop.open{display:block}
+    .grabber{width:42px;height:5px;border-radius:5px;background:var(--line);margin:0 auto 16px}
+    .ref{font-family:system-ui,-apple-system,sans-serif;color:var(--muted);font-size:13px;margin-bottom:4px}
+    .selected{font-size:28px;font-weight:700;margin-bottom:18px}
+    .original{font-size:34px;margin-bottom:5px}
+    .translit{font-style:italic;color:var(--muted);margin-bottom:16px}
+    .meaning{font-family:system-ui,-apple-system,sans-serif;line-height:1.5;margin-bottom:18px}
+    .video{display:none;font-family:system-ui,-apple-system,sans-serif;border-top:1px solid var(--line);padding-top:16px}
+    .video a{color:var(--accent);font-weight:700;text-decoration:none}
+    .close{width:100%;margin-top:18px;border:0;background:var(--accent);color:#fff;border-radius:12px;padding:13px;font-family:system-ui,-apple-system,sans-serif;font-weight:700}
+    @media(max-width:600px){main{padding-left:20px;padding-right:32px}.text{font-size:21px;line-height:1.75}.topbar{padding-left:14px;padding-right:14px}.btn{padding:8px 10px;font-size:14px}}
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="book">Genesis</div>
+    <div class="controls">
+      <button class="btn" id="bionicBtn" type="button" aria-pressed="false">Bionic</button>
+      <button class="btn" id="topBtn" type="button">Top</button>
+    </div>
+  </header>
+
+  <main>
+    <div class="intro">Continuous reading mode. Chapter and verse numbers stay hidden unless you inspect a word.</div>
+
+    <div class="section-title">The Beginning</div>
+    <article id="reader" class="text" aria-label="Bible text"></article>
+  </main>
+
+  <div class="scroll-rail" id="scrollRail" aria-label="Fast scroll">
+    <div class="scroll-track"><div class="scroll-thumb" id="scrollThumb"></div></div>
+  </div>
+  <div class="scrub-label" id="scrubLabel">Genesis</div>
+
+  <div class="sheet-backdrop" id="backdrop"></div>
+  <section class="sheet" id="wordSheet" aria-live="polite" aria-label="Word details">
+    <div class="grabber"></div>
+    <div class="ref" id="detailRef"></div>
+    <div class="selected" id="detailWord"></div>
+    <div class="original" id="detailOriginal"></div>
+    <div class="translit" id="detailTranslit"></div>
+    <div class="meaning" id="detailMeaning"></div>
+    <div class="video" id="detailVideo"><a id="videoLink" href="#" target="_blank" rel="noopener noreferrer">Watch related BibleProject video ↗</a></div>
+    <button class="close" id="closeSheet" type="button">Close</button>
+  </section>
+
+  <script>
+    const sample = [
+      {ref:'Genesis 1:1', text:'In the beginning God created the heavens and the earth.'},
+      {ref:'Genesis 1:2', text:'The earth was formless and empty. Darkness was on the surface of the deep and God’s Spirit was hovering over the surface of the waters.'},
+      {ref:'Genesis 1:3', text:'God said, “Let there be light,” and there was light.'},
+      {ref:'Genesis 1:4', text:'God saw the light, and saw that it was good. God divided the light from the darkness.'},
+      {ref:'Genesis 1:5', text:'God called the light “day,” and the darkness he called “night.” There was evening and there was morning, the first day.'},
+      {ref:'Genesis 1:6', text:'God said, “Let there be an expanse in the middle of the waters, and let it divide the waters from the waters.”'},
+      {ref:'Genesis 1:7', text:'God made the expanse and divided the waters which were under the expanse from the waters which were above the expanse. It was so.'},
+      {ref:'Genesis 1:8', text:'God called the expanse “sky.” There was evening and there was morning, a second day.'},
+      {ref:'Genesis 1:9', text:'God said, “Let the waters under the sky be gathered together to one place, and let the dry land appear.” It was so.'},
+      {ref:'Genesis 1:10', text:'God called the dry land “earth,” and the gathering together of the waters he called “seas.” God saw that it was good.'},
+      {ref:'Genesis 1:11', text:'God said, “Let the earth yield grass, herbs yielding seeds, and fruit trees bearing fruit after their kind, with their seeds in it, on the earth.” It was so.'},
+      {ref:'Genesis 1:12', text:'The earth yielded grass, herbs yielding seed after their kind, and trees bearing fruit, with their seeds in it, after their kind. God saw that it was good.'},
+      {ref:'Genesis 1:13', text:'There was evening and there was morning, a third day.'}
+    ];
+
+    const wordData = {
+      'beginning':{original:'רֵאשִׁית', translit:'rēʾšît', meaning:'Beginning, first, chief, first part.', ref:'Genesis 1:1', video:'https://www.youtube.com/@bibleproject'},
+      'god':{original:'אֱלֹהִים', translit:'ʾĕlōhîm', meaning:'God; the Hebrew noun used here is Elohim.', ref:'Genesis 1:1', video:'https://www.youtube.com/@bibleproject'},
+      'created':{original:'בָּרָא', translit:'bārāʾ', meaning:'To create, shape, or form.', ref:'Genesis 1:1', video:'https://www.youtube.com/@bibleproject'},
+      'heavens':{original:'שָׁמַיִם', translit:'šāmayim', meaning:'Heavens, sky, or the realm above.', ref:'Genesis 1:1'},
+      'earth':{original:'אֶרֶץ', translit:'ʾereṣ', meaning:'Earth, land, ground, or territory.', ref:'Genesis 1:1'},
+      'spirit':{original:'רוּחַ', translit:'rûaḥ', meaning:'Spirit, wind, or breath.', ref:'Genesis 1:2', video:'https://www.youtube.com/@bibleproject'}
+    };
+
+    const reader = document.getElementById('reader');
+    const bionicBtn = document.getElementById('bionicBtn');
+    const topBtn = document.getElementById('topBtn');
+    const sheet = document.getElementById('wordSheet');
+    const backdrop = document.getElementById('backdrop');
+    const detailRef = document.getElementById('detailRef');
+    const detailWord = document.getElementById('detailWord');
+    const detailOriginal = document.getElementById('detailOriginal');
+    const detailTranslit = document.getElementById('detailTranslit');
+    const detailMeaning = document.getElementById('detailMeaning');
+    const detailVideo = document.getElementById('detailVideo');
+    const videoLink = document.getElementById('videoLink');
+    const scrollRail = document.getElementById('scrollRail');
+    const scrollThumb = document.getElementById('scrollThumb');
+    const scrubLabel = document.getElementById('scrubLabel');
+
+    let bionic = localStorage.getItem('bible-bionic') === 'true';
+    let longPressTimer = null;
+
+    function splitWord(word){
+      const match = word.match(/^([^A-Za-zÀ-ÿ'’]*)([A-Za-zÀ-ÿ'’]+)([^A-Za-zÀ-ÿ'’]*)$/);
+      if(!match) return {pre:'',core:word,post:''};
+      return {pre:match[1],core:match[2],post:match[3]};
+    }
+
+    function bionicMarkup(core){
+      if(core.length <= 2) return `<span class="focus">${core}</span>`;
+      const cut = Math.max(1, Math.ceil(core.length * .45));
+      return `<span class="focus">${core.slice(0,cut)}</span><span class="tail">${core.slice(cut)}</span>`;
+    }
+
+    function render(){
+      reader.classList.toggle('bionic', bionic);
+      bionicBtn.setAttribute('aria-pressed', String(bionic));
+      reader.innerHTML = '';
+
+      const para = document.createElement('p');
+      para.className = 'para';
+
+      sample.forEach((verse, verseIndex) => {
+        verse.text.split(/(\s+)/).forEach(token => {
+          if(/^\s+$/.test(token)){
+            para.appendChild(document.createTextNode(token));
+            return;
+          }
+          const parts = splitWord(token);
+          const span = document.createElement('span');
+          span.className = 'word';
+          span.dataset.ref = verse.ref;
+          span.dataset.word = parts.core;
+          span.dataset.verseIndex = String(verseIndex);
+          span.innerHTML = `${parts.pre}${bionic ? bionicMarkup(parts.core) : parts.core}${parts.post}`;
+          para.appendChild(span);
+        });
+        para.appendChild(document.createTextNode(' '));
+      });
+
+      reader.appendChild(para);
+    }
+
+    function openWord(span){
+      const clean = (span.dataset.word || '').toLowerCase().replace(/[’']/g,'');
+      const data = wordData[clean];
+      detailRef.textContent = span.dataset.ref || '';
+      detailWord.textContent = span.dataset.word || '';
+      if(data){
+        detailOriginal.textContent = data.original;
+        detailTranslit.textContent = data.translit;
+        detailMeaning.textContent = data.meaning;
+        if(data.video){
+          videoLink.href = data.video;
+          detailVideo.style.display = 'block';
+        } else {
+          detailVideo.style.display = 'none';
+        }
+      } else {
+        detailOriginal.textContent = 'Original-language data not added yet';
+        detailTranslit.textContent = '';
+        detailMeaning.textContent = 'This prototype currently includes original-language data for a small sample of words. The full dataset will be added later.';
+        detailVideo.style.display = 'none';
+      }
+      sheet.classList.add('open');
+      backdrop.classList.add('open');
+    }
+
+    function closeSheet(){
+      sheet.classList.remove('open');
+      backdrop.classList.remove('open');
+    }
+
+    reader.addEventListener('pointerdown', e => {
+      const span = e.target.closest('.word');
+      if(!span) return;
+      longPressTimer = setTimeout(() => openWord(span), 450);
+    });
+    ['pointerup','pointercancel','pointermove'].forEach(type => reader.addEventListener(type, () => clearTimeout(longPressTimer)));
+    reader.addEventListener('click', e => {
+      const span = e.target.closest('.word');
+      if(span && matchMedia('(pointer:fine)').matches) openWord(span);
+    });
+
+    bionicBtn.addEventListener('click', () => {
+      bionic = !bionic;
+      localStorage.setItem('bible-bionic', String(bionic));
+      render();
+    });
+    topBtn.addEventListener('click', () => window.scrollTo({top:0,behavior:'smooth'}));
+    document.getElementById('closeSheet').addEventListener('click', closeSheet);
+    backdrop.addEventListener('click', closeSheet);
+
+    function updateThumb(){
+      const max = document.documentElement.scrollHeight - innerHeight;
+      const p = max > 0 ? scrollY / max : 0;
+      scrollThumb.style.top = `${Math.max(0,Math.min(100,p*100))}%`;
+      localStorage.setItem('bible-scroll', String(scrollY));
+    }
+
+    function scrub(clientY){
+      const rect = scrollRail.getBoundingClientRect();
+      const p = Math.max(0, Math.min(1, (clientY - rect.top) / rect.height));
+      const max = document.documentElement.scrollHeight - innerHeight;
+      window.scrollTo(0, max * p);
+      const idx = Math.min(sample.length - 1, Math.floor(p * sample.length));
+      scrubLabel.textContent = sample[idx].ref.replace(':',' : ');
+    }
+
+    scrollRail.addEventListener('pointerdown', e => {
+      scrollRail.setPointerCapture(e.pointerId);
+      scrubLabel.style.display = 'block';
+      scrub(e.clientY);
+    });
+    scrollRail.addEventListener('pointermove', e => {
+      if(scrollRail.hasPointerCapture(e.pointerId)) scrub(e.clientY);
+    });
+    scrollRail.addEventListener('pointerup', e => {
+      if(scrollRail.hasPointerCapture(e.pointerId)) scrollRail.releasePointerCapture(e.pointerId);
+      scrubLabel.style.display = 'none';
+    });
+
+    window.addEventListener('scroll', updateThumb, {passive:true});
+    window.addEventListener('beforeunload', updateThumb);
+
+    render();
+    requestAnimationFrame(() => {
+      const saved = Number(localStorage.getItem('bible-scroll') || 0);
+      if(Number.isFinite(saved) && saved > 0) window.scrollTo(0, saved);
+      updateThumb();
+    });
+  </script>
+</body>
+</html>
