@@ -63,6 +63,33 @@
     }
   }
 
+  // Translation convention: Hebrew יהוה (Strong's H3068) is displayed as YHWH.
+  // This is keyed to the underlying Hebrew alignment, not a blind replacement of English "LORD".
+  function applyYHWH(root=document){
+    const lordWords=[...root.querySelectorAll?.('.word[data-strong="H3068"]')||[]]
+      .filter(el=>/^LORD[.,;:!?]?$/i.test(el.dataset.raw||''));
+    for(const el of lordWords){
+      const punctuation=(el.dataset.raw||'').match(/[.,;:!?]+$/)?.[0]||'';
+      el.dataset.raw='YHWH'+punctuation;
+      el.textContent='YHWH'+punctuation;
+
+      // BSB often supplies the English article "the" inside the same H3068-aligned phrase
+      // (for example "Then the LORD"). YHWH is a proper name, so remove that supplied article.
+      let prev=el.previousElementSibling;
+      if(prev?.classList.contains('word') && prev.dataset.strong==='H3068' && /^the$/i.test(prev.dataset.raw||'')){
+        const between=prev.nextSibling;
+        prev.remove();
+        if(between?.nodeType===Node.TEXT_NODE && /^\s+$/.test(between.nodeValue||'')) between.remove();
+      }
+    }
+  }
+
+  const reader=document.getElementById('reader');
+  if(reader){
+    applyYHWH(reader);
+    new MutationObserver(()=>applyYHWH(reader)).observe(reader,{childList:true,subtree:true});
+  }
+
   window.addEventListener('online',downloadBible);
   registerWorker().finally(()=>setTimeout(downloadBible,600));
 })();
