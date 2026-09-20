@@ -93,3 +93,62 @@
   window.addEventListener('online',downloadBible);
   registerWorker().finally(()=>setTimeout(downloadBible,600));
 })();
+
+// Reader palettes shared with the budgeting app.
+(()=>{
+  const PALETTES={
+    cedar:['#aebca5','#eee1c8','#304638','#c77f63'],
+    sandy:['#e1cf99','#fff8e5','#422c18','#a9b982'],
+    petals:['#aaaee0','#f7d7c8','#494e96','#eda5b5'],
+    harbor:['#9fb7be','#f3eadb','#263e4b','#d58f79'],
+    plum:['#b9a5b5','#f2e5cf','#51374e','#c7a24c'],
+    meadow:['#b8c7a3','#f3ead4','#314536','#d4a35f'],
+    ocean:['#92b6c2','#eef3ed','#234654','#e0a071'],
+    rosewood:['#b9a2a1','#f1dfd2','#542f34','#c8896d'],
+    midnight:['#10151b','#1b232c','#f3efe7','#b79ad8']
+  };
+  const names={cedar:'Cedar',sandy:'Sandy',petals:'Petals',harbor:'Harbor',plum:'Plum',meadow:'Meadow',ocean:'Ocean',rosewood:'Rosewood',midnight:'Midnight'};
+  const style=document.createElement('style');
+  style.textContent=`
+    html[data-palette]{--bg:var(--palette-bg);--paper:var(--palette-paper);--text:var(--palette-text);--muted:color-mix(in srgb,var(--palette-text) 66%,var(--palette-bg));--line:color-mix(in srgb,var(--palette-text) 18%,var(--palette-bg));--accent:var(--palette-accent);--accent-soft:color-mix(in srgb,var(--palette-accent) 18%,var(--palette-paper))}
+    .theme-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+    .theme-choice{min-width:0;border:1px solid var(--line);background:var(--paper);color:var(--text);border-radius:14px;padding:10px 8px 9px;text-align:left;font-size:12px;font-weight:650}
+    .theme-choice.selected{outline:2px solid var(--accent);outline-offset:1px}
+    .theme-swatch{height:38px;border-radius:9px;margin-bottom:7px;display:grid;grid-template-columns:repeat(4,1fr);overflow:hidden;border:1px solid color-mix(in srgb,var(--text) 12%,transparent)}
+    .theme-swatch i{display:block}
+    @media(max-width:420px){.theme-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  `;
+  document.head.append(style);
+
+  function applyPalette(key){
+    if(!PALETTES[key])key='cedar';
+    const [bg,paper,text,accent]=PALETTES[key];
+    const root=document.documentElement;
+    root.dataset.palette=key;
+    root.style.setProperty('--palette-bg',bg);
+    root.style.setProperty('--palette-paper',paper);
+    root.style.setProperty('--palette-text',text);
+    root.style.setProperty('--palette-accent',accent);
+    const themeColor=document.getElementById('themeColor');
+    if(themeColor)themeColor.content=bg;
+    localStorage.setItem('bible-palette',key);
+    document.querySelectorAll('.theme-choice').forEach(b=>b.classList.toggle('selected',b.dataset.palette===key));
+  }
+
+  const appearance=[...document.querySelectorAll('#settingsPanel .settings-section')].find(s=>s.querySelector('.settings-label')?.textContent.trim()==='Appearance');
+  if(appearance){
+    appearance.querySelector('.settings-label').textContent='Theme';
+    const old=appearance.querySelector('.choice-row');
+    const grid=document.createElement('div');
+    grid.className='theme-grid';
+    for(const [key,colors] of Object.entries(PALETTES)){
+      const b=document.createElement('button');
+      b.type='button';b.className='theme-choice';b.dataset.palette=key;
+      b.innerHTML=`<span class="theme-swatch">${colors.map(c=>`<i style="background:${c}"></i>`).join('')}</span>${names[key]}`;
+      b.onclick=()=>applyPalette(key);
+      grid.append(b);
+    }
+    old?.replaceWith(grid);
+  }
+  applyPalette(localStorage.getItem('bible-palette')||'cedar');
+})();
