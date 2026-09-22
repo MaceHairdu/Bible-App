@@ -1,4 +1,4 @@
-const APP_CACHE='bible-app-v1';
+const APP_CACHE='bible-app-v2';
 const BIBLE_CACHE='bible-text-v1';
 const APP_SHELL=['./','./index.html','./modern.css','./manifest.webmanifest','./edits.json','./offline.js','./icon-192.png','./icon-512.png','./apple-touch-icon.png'];
 
