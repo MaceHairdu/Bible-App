@@ -1,6 +1,6 @@
-const APP_CACHE='bible-app-v3';
+const APP_CACHE='bible-app-v4';
 const BIBLE_CACHE='bible-text-v1';
-const APP_SHELL=['./','./index.html','./modern.css','./manifest.webmanifest','./edits.json','./offline.js','./icon-192.png','./icon-512.png','./apple-touch-icon.png'];
+const APP_SHELL=['./','./index.html','./modern.css','./manifest.webmanifest','./offline.js','./icon-192.png','./icon-512.png','./apple-touch-icon.png'];
 
 self.addEventListener('install',event=>{
   event.waitUntil((async()=>{
@@ -26,6 +26,7 @@ self.addEventListener('fetch',event=>{
   if(req.method!=='GET') return;
   const url=new URL(req.url);
   const isBible=url.hostname==='raw.githubusercontent.com' && url.pathname.includes('/BSB-publishing/bsb-data-output/main/base/helloao/');
+  const isEdits=url.origin===self.location.origin && url.pathname.endsWith('/edits.json');
 
   if(isBible){
     event.respondWith((async()=>{
@@ -35,6 +36,25 @@ self.addEventListener('fetch',event=>{
       const fresh=await fetch(req);
       if(fresh.ok) await cache.put(req,fresh.clone());
       return fresh;
+    })());
+    return;
+  }
+
+  if(isEdits){
+    event.respondWith((async()=>{
+      const cache=await caches.open(APP_CACHE);
+      try{
+        const fresh=await fetch(req,{cache:'no-store'});
+        if(fresh.ok){
+          await cache.put('./edits.json',fresh.clone());
+          return fresh;
+        }
+        throw new Error('edits.json network response was not OK');
+      }catch(err){
+        const cached=await cache.match('./edits.json');
+        if(cached) return cached;
+        throw err;
+      }
     })());
     return;
   }
