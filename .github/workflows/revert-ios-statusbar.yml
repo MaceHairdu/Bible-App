@@ -1,0 +1,32 @@
+name: Revert iOS status bar experiment
+on:
+  push:
+    paths:
+      - '.github/workflows/revert-ios-statusbar.yml'
+permissions:
+  contents: write
+jobs:
+  revert:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Restore pre-experiment iOS layout and refresh cache
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('index.html')
+          s=p.read_text()
+          s=s.replace('<meta name="apple-mobile-web-app-capable" content="yes">\n','')
+          s=s.replace('<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">\n','')
+          p.write_text(s)
+          sw=Path('service-worker.js')
+          t=sw.read_text().replace("const APP_CACHE='bible-app-v2';","const APP_CACHE='bible-app-v3';")
+          sw.write_text(t)
+          PY
+      - name: Commit restoration
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html service-worker.js
+          git diff --cached --quiet || git commit -m "Restore Bible app layout after iOS status bar test"
+          git push
